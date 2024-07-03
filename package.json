@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "dependencies": {
+    "appwrite": "^15.0.0",
+    "argon2": "^0.40.3",
+    "dotenv": "^16.4.5",
+    "nodemailer": "^6.9.14"
+  }
+}

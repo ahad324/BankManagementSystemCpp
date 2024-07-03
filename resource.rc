@@ -1,0 +1,3 @@
+// resource.rc
+#include "resource.h"
+IDI_APP_ICON ICON "./Logo.ico"
