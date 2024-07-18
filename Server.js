@@ -239,6 +239,7 @@ async function Register(username, pass, email, accType, cnic, key) {
     console.error("Error:", error);
   }
 }
+MoveToAccounts("12345-1234567-1")
 
 /*<=============================================================================================================>*/
 
@@ -563,7 +564,7 @@ async function forgot_password(cnic, key) {
 if (command === "sendOTPEmail") {
   const email = args[1];
   const otp = args[2];
-  const reason = args[3];
+  const reason = args.slice(3).join(' ');
   sendOTPEmail(email, otp, reason);
 }
 
@@ -718,9 +719,9 @@ async function sendOTPEmail(email, otp, reason) {
               >
                 Need help? Ask at
                 <a
-                  href="mailto:usman326261@gmail.com"
+                  href="mailto:autfinance.bank@gmail.com"
                   style="color: #499fb6; text-decoration: none;"
-                  >usman326261@gmail.com</a
+                  >autfinance.bank@gmail.com</a
                 >
                 or visit our
                 <a
@@ -812,14 +813,12 @@ async function sendOTPEmail(email, otp, reason) {
     console.error('Error sending OTP:', error);
   }
 }
-// sendOTPEmail("royalgujjar813@gmail.com", "1233")
 
 if (command === "sendEmail") {
   const email = args[1];
   const message = args.slice(2).join(' ');
   sendEmail(email, message);
 }
-// sendEmail("royalgujjar813@gmail.com", "This is the test Message from ME.")
 async function sendEmail(email, message) {
   try {
     let date = new Date();
@@ -955,9 +954,9 @@ async function sendEmail(email, message) {
               >
                 Need help? Ask at
                 <a
-                  href="mailto:usman326261@gmail.com"
+                  href="mailto:autfinance.bank@gmail.com"
                   style="color: #499fb6; text-decoration: none;"
-                  >usman326261@gmail.com</a
+                  >autfinance.bank@gmail.com</a
                 >
                 or visit our
                 <a

@@ -1194,64 +1194,60 @@ public:
     }
     void RecoverPasswordWithEmailAndOTP()
     {
-        while (true)
+        system("cls");
+
+        cout << "\n\n";
+        PrintColoredTittle(" _____________________________________________________________________________________", TittleColorCode);
+        PrintColoredTittle("|                                                                                     |", TittleColorCode);
+        PrintColoredTittle("|                                 Password Recovery                                   |", TittleColorCode);
+        PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
+
+        string email, command, result;
+        InputTaking("Enter Email");
+        cin >> email;
+
+        PrintErrorsORSucess("Processing your request...", WaitingMessagesColorCode);
+
+        if (CheckEmail(email))
         {
-            system("cls");
+            PrintErrorsORSucess("Email not found. Please enter a registered email.", ErrorMessagesColorCode);
+            PrintColoredText("Press any key to continue...", PressKeyColorCode);
+            _getch(); // Wait for user input
+            return;
+        }
 
-            cout << "\n\n";
-            PrintColoredTittle(" _____________________________________________________________________________________", TittleColorCode);
-            PrintColoredTittle("|                                                                                     |", TittleColorCode);
-            PrintColoredTittle("|                                 Password Recovery                                   |", TittleColorCode);
-            PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
+        if (!verifyOtp(email, "Password Recovery"))
+        {
+            PrintErrorsORSucess("Invalid OTP. Please try again.", ErrorMessagesColorCode);
+            PrintColoredText("Press any key to continue...", PressKeyColorCode);
+            _getch(); // Wait for user input
+            return;
+        }
 
-            string email, command, result;
-            InputTaking("Enter Email");
-            cin >> email;
-
-            PrintErrorsORSucess("Processing your request...", WaitingMessagesColorCode);
-
-            if (CheckEmail(email))
+        accounts.clear();
+        loadAccountsFromBackend();
+        for (const auto &account : accounts)
+        {
+            if (account->getEmail() == email)
             {
-                PrintErrorsORSucess("Email not found. Please enter a registered email.", ErrorMessagesColorCode);
-                PrintColoredText("Press any key to continue...", PressKeyColorCode);
-                _getch(); // Wait for user input
-                continue;
-            }
-
-            if (!verifyOtp(email, "Password Recovery"))
-            {
-                PrintErrorsORSucess("Invalid OTP. Please try again.", ErrorMessagesColorCode);
-                PrintColoredText("Press any key to continue...", PressKeyColorCode);
-                _getch(); // Wait for user input
-                continue;
-            }
-
-            accounts.clear();
-            loadAccountsFromBackend();
-            for (const auto &account : accounts)
-            {
-                if (account->getEmail() == email)
+                while (true)
                 {
-                    while (true)
-                    {
-                        string new_password;
-                        InputTaking("Enter new password");
-                        cin >> new_password;
+                    string new_password;
+                    InputTaking("Enter new password");
+                    cin >> new_password;
 
-                        if (new_password.length() < 8)
-                        {
-                            PrintErrorsORSucess("Password must be at least 8 characters", ErrorMessagesColorCode);
-                        }
-                        else
-                        {
-                            changeUserPassword(account->getCNIC(), new_password);
-                            break;
-                        }
+                    if (new_password.length() < 8)
+                    {
+                        PrintErrorsORSucess("Password must be at least 8 characters", ErrorMessagesColorCode);
                     }
-                    break;
+                    else
+                    {
+                        changeUserPassword(account->getCNIC(), new_password);
+                        break;
+                    }
                 }
+                break;
             }
-            break; // Exit the while loop after successful password change
         }
     }
 
@@ -1321,7 +1317,7 @@ public:
         int code = rand() % 9000 + 1000;
         string scode = to_string(code);
         PrintErrorsORSucess("Please wait we are sending you OTP for " + reason + "...", WaitingMessagesColorCode);
-        string command = "sendOTPEmail " + email + " " + scode + " " + reason;
+        string command = "sendOTPEmail " + email + " " + scode + " \"" + reason + "\"";
         callJavaScript(command);
 
         int temp_code;
