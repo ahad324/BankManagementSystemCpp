@@ -6,9 +6,9 @@ using namespace std;
 
 int main()
 {
-    setConsoleTitle("AUT Finance Bank");
     if (checkAndInstallDependencies())
     {
+        setConsoleTitle("AUT Finance Bank");
         start();
     }
     else
