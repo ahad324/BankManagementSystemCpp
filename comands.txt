@@ -1,0 +1,9 @@
+// Include Icon as well
+windres resource.rc -o resource.o
+
+
+// If all files are outside
+g++ Main.cpp Menu.cpp Dependencies.cpp EmailUtils.cpp Constants.h ConsoleUtils.cpp Bank.cpp Account.cpp JavascriptUtils.cpp resource.o -o Main.exe
+
+// For Structured Approach
+g++ -Iinclude Main.cpp src/*.cpp resource.o -o Main.exe

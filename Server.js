@@ -125,6 +125,7 @@ async function MoveToAccounts(cnic) {
       COLLECTION_ID_PENDING_ACCOUNTS,
       [Query.equal("CNIC", cnic)]
     );
+
     const { username, email, accountType, CNIC, password, Key } = response.documents[0];
     let payload = {
       username: username,
@@ -239,7 +240,6 @@ async function Register(username, pass, email, accType, cnic, key) {
     console.error("Error:", error);
   }
 }
-MoveToAccounts("12345-1234567-1")
 
 /*<=============================================================================================================>*/
 

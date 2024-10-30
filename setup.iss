@@ -12,12 +12,9 @@ AppPublisher=AbdulAhad
 
 [Files]
 Source: "Main.exe"; DestDir: "{app}"
-Source: "/Policy/PolicyChanger.exe"; DestDir: "{app}"
 Source: "Server.js"; DestDir: "{app}"
-Source: "output.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "package.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".env"; DestDir: "{app}"; Flags: ignoreversion
-Source: "node_modules\*"; DestDir: "{app}\node_modules"; Flags: recursesubdirs createallsubdirs
 Source: "Policy\*"; DestDir: "{app}\Policy";
 
 [Icons]
