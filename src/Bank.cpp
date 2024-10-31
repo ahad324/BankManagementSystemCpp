@@ -127,29 +127,55 @@ void Bank::loadPendingAccountsFromBackend()
 bool Bank::authenticateAdmin(string username, string password)
 {
   PrintErrorsORSucess("Proccessing your request...", WaitingMessagesColorCode);
+  // Check if the admin is in the cache
+  auto cachedPassword = adminCache.find(username);
+  if (cachedPassword != adminCache.end() && cachedPassword->second == password)
+  {
+    return true;
+  }
+
+  // If not in cache, call JavaScript function
   string command = "AdminLogin " + username + " " + password;
   string result = callJavaScript(command);
-  return (result == "SUCCESS" ? true : false);
+  if (result == "SUCCESS")
+  {
+    adminCache[username] = password; // Cache the admin's password
+    return true;
+  }
+  return false;
+}
+
+Account *Bank::handleSuccessfulLogin(const string &cnic)
+{
+  PrintErrorsORSucess("Logging in...", WaitingMessagesColorCode);
+  accounts.clear();
+  loadAccountsFromBackend();
+  PrintErrorsORSucess("Getting your dashboard ready...", WaitingMessagesColorCode);
+  auto it = accounts.find(cnic);
+  if (it != accounts.end())
+  {
+    return it->second;
+  }
+  return nullptr;
 }
 
 Account *Bank::authenticateUser(string cnic, string password)
 {
   PrintErrorsORSucess("Proccessing your request...", WaitingMessagesColorCode);
+  // Check if the user is in the cache
+  auto cachedPassword = userCache.find(cnic);
+  if (cachedPassword != userCache.end() && cachedPassword->second == password)
+  {
+    return handleSuccessfulLogin(cnic);
+  }
+  // If not in cache, call JavaScript function
   string command = "UserLogin " + cnic + " " + password;
   string result = callJavaScript(command);
   if (result == "SUCCESS")
   {
-    PrintErrorsORSucess("Logging in...", WaitingMessagesColorCode);
-    accounts.clear();
-    loadAccountsFromBackend();
-    PrintErrorsORSucess("Getting your dashboard ready...", WaitingMessagesColorCode);
-    auto it = accounts.find(cnic);
-    if (it != accounts.end())
-    {
-      return it->second;
-    }
+    userCache[cnic] = password; // Cache the user's password
+    return handleSuccessfulLogin(cnic);
   }
-
   // If user not found , return nullptr
   return nullptr;
 }

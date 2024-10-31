@@ -12,6 +12,8 @@ class Bank
 private:
   unordered_map<string, Account *> accounts;
   unordered_map<string, Account *> pendingAccounts;
+  unordered_map<string, string> userCache;  // Cache for user CNICs and passwords
+  unordered_map<string, string> adminCache; // Cache for admin usernames and passwords
 
 public:
   Bank();
@@ -32,6 +34,7 @@ public:
   double getValidatedAmount();
   string getPasswordInput();
   void transferMoney(Account *from_account);
+  Account *handleSuccessfulLogin(const string &cnic);
   void login();
   void forgotPassword();
   void RecoverPasswordWithCNICAndKey();
