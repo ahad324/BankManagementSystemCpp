@@ -61,20 +61,20 @@ void Bank::loadAccountsFromBackend()
 
     // Split each line into account details
     stringstream lineStream(line);
-    string username, email, accountType, cnic;
+    string username, email, accountType, cnic, key;
     double balance;
 
-    lineStream >> username >> email >> accountType >> balance >> cnic;
+    lineStream >> username >> email >> accountType >> balance >> cnic >> key;
 
     // Create account objects based on the account type
     Account *account = nullptr;
     if (accountType == "Savings")
     {
-      account = new SavingsAccount(cnic, username, "", email, balance);
+      account = new SavingsAccount(cnic, username, "", email, balance, key);
     }
     else
     {
-      account = new CurrentAccount(cnic, username, "", email, balance);
+      account = new CurrentAccount(cnic, username, "", email, balance, key);
     }
 
     // Store account in unordered_map
@@ -111,12 +111,12 @@ void Bank::loadPendingAccountsFromBackend()
     Account *pendingaccount = nullptr;
     if (accountType == "Savings")
     {
-      pendingaccount = new SavingsAccount(cnic, username, "", email, 0);
+      pendingaccount = new SavingsAccount(cnic, username, "", email);
       ;
     }
     else
     {
-      pendingaccount = new CurrentAccount(cnic, username, "", email, 0);
+      pendingaccount = new CurrentAccount(cnic, username, "", email);
     }
 
     // Store pending account in unordered_map
@@ -166,6 +166,7 @@ Account *Bank::authenticateUser(string cnic, string password)
   auto cachedPassword = userCache.find(cnic);
   if (cachedPassword != userCache.end() && cachedPassword->second == password)
   {
+    // cout << "Using Caching\n"; // Debugging line
     return handleSuccessfulLogin(cnic);
   }
   // If not in cache, call JavaScript function
@@ -275,7 +276,7 @@ void Bank::approvePendingAccounts()
       string command = "MoveToAccounts " + cnic;
       string result = callJavaScript(command);
 
-      if (result == "ACCOUNT MOVED TO ACCOUNTS SUCCESSFULLY")
+      if (result == "SUCCESS")
       {
         // Move the account from pendingAccounts to accounts
         accounts[cnic] = it->second;
@@ -832,6 +833,17 @@ string Bank::generateRandomKey(int length)
   return random_key;
 }
 
+bool Bank::checkExit(const string &input)
+{
+  if (input == "exit" || input == "EXIT")
+  {
+    PrintErrorsORSucess("Registration cancelled.", ErrorMessagesColorCode);
+    PrintErrorsORSucess("Press any key to continue......", WaitingMessagesColorCode);
+    _getch();
+    return true;
+  }
+  return false;
+}
 void Bank::createAccount()
 {
   system("cls");
@@ -840,6 +852,9 @@ void Bank::createAccount()
   PrintColoredTittle("|                                                                                     |", TittleColorCode);
   PrintColoredTittle("|                                      User Registration                              |", TittleColorCode);
   PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
+
+  PrintColoredText("(Enter 'exit' at any prompt to cancel registration)\n\n", ErrorMessagesColorCode);
+
   string command;
   string cnic, username, password, email, account_type;
   double initial_deposit = 0;
@@ -849,6 +864,8 @@ void Bank::createAccount()
     InputTaking("Enter CNIC (xxxxx-xxxxxxx-x)");
     cin >> cnic;
 
+    if (checkExit(cnic))
+      return;
     if (!regex_match(cnic, regex(R"(^\d{5}-\d{7}-\d{1}$)")))
     {
       PrintErrorsORSucess("Invalid CNIC. Please enter a valid 13-digit CNIC including dashes (\"-\").", ErrorMessagesColorCode);
@@ -867,6 +884,9 @@ void Bank::createAccount()
   {
     InputTaking("Enter username");
     cin >> username;
+
+    if (checkExit(username))
+      return;
     if (username.length() < 3)
     {
       PrintErrorsORSucess("Username must be at least 3 characters", ErrorMessagesColorCode);
@@ -881,6 +901,9 @@ void Bank::createAccount()
   {
     InputTaking("Enter password");
     cin >> password;
+
+    if (checkExit(password))
+      return;
     if (password.length() < 8)
     {
       PrintErrorsORSucess("Password must be at least 8 characters", ErrorMessagesColorCode);
@@ -896,6 +919,8 @@ void Bank::createAccount()
     InputTaking("Enter email");
     cin >> email;
 
+    if (checkExit(email))
+      return;
     if (!regex_match(email, regex(".+@.+\\..+")))
     {
       PrintErrorsORSucess("Invalid email format. Please enter a valid email.", ErrorMessagesColorCode);
@@ -913,18 +938,25 @@ void Bank::createAccount()
       break; // Email is unique, exit the loop
     }
   }
+
+  srand(time(0));     // Seeding the random number generator
+  int key_length = 5; // Length of the random key
+  string forgot_password_key = generateRandomKey(key_length);
   while (true)
   {
     InputTaking("Enter account type (Savings 'S' /Current 'C')");
     cin >> account_type;
+
+    if (checkExit(account_type))
+      return;
     if (account_type == "S" || account_type == "s")
     {
-      createAccount(new SavingsAccount(cnic, username, password, email, initial_deposit), true);
+      createAccount(new SavingsAccount(cnic, username, password, email, initial_deposit, forgot_password_key), true);
       break;
     }
     else if (account_type == "C" || account_type == "c")
     {
-      createAccount(new CurrentAccount(cnic, username, password, email, initial_deposit), true);
+      createAccount(new CurrentAccount(cnic, username, password, email, initial_deposit, forgot_password_key), true);
       break;
     }
     else
@@ -932,20 +964,17 @@ void Bank::createAccount()
       PrintErrorsORSucess("Invalid account type. Please try again.", ErrorMessagesColorCode);
     }
   }
-  srand(time(0));     // Seed the random number generator
-  int key_length = 5; // Length of the random key
-  string random_key = generateRandomKey(key_length);
   cout << "\n";
   PrintColoredTittle("-------------------------------------------------------------------------------------", ErrorMessagesColorCode);
-  PrintColoredTittle("|     Save this secret key. You'll need it if you forget your password : " + random_key + "      |", SuccessMessagesColorCode);
+  PrintColoredTittle("|     Save this secret key. You'll need it if you forget your password : " + forgot_password_key + "      |", SuccessMessagesColorCode);
   PrintColoredTittle("-------------------------------------------------------------------------------------", ErrorMessagesColorCode);
   cout << "\n";
-  command = "forgot_password " + cnic + " " + random_key + " " + "create";
+  command = "forgot_password " + cnic + " " + forgot_password_key + " " + "create";
   callJavaScript(command);
 
   PrintErrorsORSucess("Hold on creating your account.", WaitingMessagesColorCode);
 
-  command = "Register " + username + " " + password + " " + email + " " + account_type + " " + cnic + " " + random_key;
+  command = "Register " + username + " " + password + " " + email + " " + account_type + " " + cnic + " " + forgot_password_key;
   callJavaScript(command);
   PrintErrorsORSucess("Account created successfully. Pending admin approval.", SuccessMessagesColorCode);
   cout << "\n";

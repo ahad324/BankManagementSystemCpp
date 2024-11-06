@@ -11,8 +11,8 @@
 #include "../include/Menu.h"
 using namespace std;
 
-Account::Account(string _cnic, string _username, string _password, string _email, double _balance)
-    : cnic(_cnic), username(_username), password(_password), email(_email), balance(_balance) {}
+Account::Account(string _cnic, string _username, string _password, string _email, double _balance, string _forgot_password_key)
+    : cnic(_cnic), username(_username), password(_password), email(_email), balance(_balance), forgot_password_key(_forgot_password_key) {}
 
 Account::~Account() {}
 
@@ -37,7 +37,10 @@ string Account::getUsername() const { return username; }
 string Account::getCNIC() const { return cnic; }
 string Account::getPassword() const { return password; }
 
-string Account::getEmail() const { return email; }
+string Account::getEmail() const
+{
+  return email;
+}
 
 double Account::getBalance() const { return balance; }
 void Account::setBalance(double newBalance) { balance = newBalance; }
@@ -174,6 +177,8 @@ void Account::displayUserDetails()
   cout << getAccountType() << endl;
   InputTaking("Balance");
   cout << balance << endl;
+  InputTaking("Forgot Password key");
+  cout << forgot_password_key << endl;
   cout << "\n";
   PrintColoredText("Press any key to continue...", PressKeyColorCode);
   _getch(); // Wait for user input
@@ -201,8 +206,8 @@ void Account::viewTransactionHistory(string cnic) const
   _getch(); // Wait for user input
 }
 
-SavingsAccount::SavingsAccount(string _cnic, string _username, string _password, string _email, double _balance)
-    : Account(_cnic, _username, _password, _email, _balance) {}
+SavingsAccount::SavingsAccount(string _cnic, string _username, string _password, string _email, double _balance, string _forgot_password_key)
+    : Account(_cnic, _username, _password, _email, _balance, _forgot_password_key) {}
 
 // Get account type
 string SavingsAccount::getAccountType() const
@@ -210,8 +215,8 @@ string SavingsAccount::getAccountType() const
   return "Savings";
 }
 
-CurrentAccount::CurrentAccount(string _cnic, string _username, string _password, string _email, double _balance)
-    : Account(_cnic, _username, _password, _email, _balance) {}
+CurrentAccount::CurrentAccount(string _cnic, string _username, string _password, string _email, double _balance, string _forgot_password_key)
+    : Account(_cnic, _username, _password, _email, _balance, _forgot_password_key) {}
 
 // Get account type
 string CurrentAccount::getAccountType() const

@@ -63,17 +63,16 @@ async function FetchAccounts() {
     );
     for (let i = 0; i < response.total; i++) {
       const user = response.documents[i];
-      const { username, email, accountType, balance, CNIC } = user;
+      const { username, email, accountType, balance, CNIC, Key } = user;
 
       console.log(
-        `${username} ${email} ${accountType} ${balance} ${CNIC}`
+        `${username} ${email} ${accountType} ${balance} ${CNIC} ${Key}`
       );
     }
   } catch (error) {
     console.error("Error:", error);
   }
 }
-
 /**
  * Fetches pending account details from the database and logs specific user information.
  * @returns {void}
@@ -144,7 +143,7 @@ async function MoveToAccounts(cnic) {
       payload
     );
     DeleteAccount(cnic, COLLECTION_ID_PENDING_ACCOUNTS);
-    console.log("ACCOUNT MOVED TO ACCOUNTS SUCCESSFULLY");
+    console.log("SUCCESS");
   } catch (error) {
     console.error("Error:", error);
   }

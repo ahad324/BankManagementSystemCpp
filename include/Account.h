@@ -21,11 +21,12 @@ protected:
   string username;
   string password;
   string email;
+  string forgot_password_key;
   double balance;
   vector<Transaction> transactions; // Transaction history
 
 public:
-  Account(string _cnic, string _username, string _password, string _email, double _balance = 0);
+  Account(string _cnic, string _username, string _password, string _email, double _balance = 0, string _forgot_password_key = "");
   virtual ~Account();
   string getUsername() const;
   string getCNIC() const;
@@ -48,14 +49,14 @@ public:
 class SavingsAccount : public Account
 {
 public:
-  SavingsAccount(string _cnic, string _username, string _password, string _email, double _balance = 0);
+  SavingsAccount(string _cnic, string _username, string _password, string _email, double _balance = 0, string _forgot_password_key = "");
   string getAccountType() const override;
 };
 
 class CurrentAccount : public Account
 {
 public:
-  CurrentAccount(string _cnic, string _username, string _password, string _email, double _balance = 0);
+  CurrentAccount(string _cnic, string _username, string _password, string _email, double _balance = 0, string _forgot_password_key = "");
   string getAccountType() const override;
 };
 

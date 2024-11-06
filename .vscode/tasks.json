@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+      {
+          "type": "cppbuild",
+          "label": "C/C++: Custom build",
+          "command": "C:\\MinGW\\bin\\g++.exe",
+          "args": [
+              "-Iinclude",
+              "Main.cpp",
+              "src/*.cpp",
+              "resource.o",
+              "-o",
+              "${fileDirname}\\Main.exe"
+          ],
+          "options": {
+              "cwd": "${workspaceFolder}"
+          },
+          "problemMatcher": ["$gcc"],
+          "group": {
+              "kind": "build",
+              "isDefault": true
+          },
+          "detail": "Custom build task"
+      }
+  ]
+}

@@ -44,6 +44,7 @@ public:
   int SendOTP(string email, string reason);
   bool verifyOtp(string email, string reason);
   string generateRandomKey(int length);
+  bool checkExit(const string &input);
   void createAccount();
   void adminLogin();
   void adminMenu();
