@@ -631,7 +631,7 @@ async function sendOTPEmail(email, otp, reason) {
                       <img
                         alt="AUT Bank Logo"
                         src="https://raw.githubusercontent.com/ahad324/BankManagementSystemCpp/main/Logo.jpeg"
-                        height="30px"
+                        height="100px"
                       />
                     </td>
                     <td style="text-align: right;">
@@ -654,6 +654,7 @@ async function sendOTPEmail(email, otp, reason) {
                   background: #ffffff;
                   border-radius: 30px;
                   text-align: center;
+                  box-shadow:0 0 20px rgba(0,0,0,0.5);
                 "
               >
                 <div style="width: 100%; max-width: 489px; margin: 0 auto;">
@@ -689,7 +690,7 @@ async function sendOTPEmail(email, otp, reason) {
                     to complete the procedure of ${reason}. OTP is
                     valid for
                     <span style="font-weight: 600; color: #1f1f1f;">5 minutes</span>.
-                    Do not share this code with others, including Admin.
+                    Do not share this code with others.
                   </p>
                   <p
                     style="
@@ -882,7 +883,7 @@ async function sendEmail(email, message) {
                       <img
                         alt="AUT Bank Logo"
                         src="https://raw.githubusercontent.com/ahad324/BankManagementSystemCpp/main/Logo.jpeg"
-                        height="30px"
+                        height="100px"
                       />
                     </td>
                     <td style="text-align: right;">
@@ -905,6 +906,7 @@ async function sendEmail(email, message) {
                   background: #ffffff;
                   border-radius: 30px;
                   text-align: center;
+                  box-shadow:0 0 20px rgba(0,0,0,0.5);
                 "
               >
                 <div style="width: 100%; max-width: 489px; margin: 0 auto;">
@@ -1042,7 +1044,7 @@ async function sendEmail(email, message) {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('EMAIL_SENT');
+    console.log('SUCCESS');
   } catch (error) {
     console.error('Error sending OTP:', error);
   }

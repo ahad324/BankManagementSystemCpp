@@ -38,7 +38,7 @@ void WriteEmail()
       PrintErrorsORSucess("Sending Message...", WaitingMessagesColorCode);
       command = "sendEmail " + email + " " + message;
       result = callJavaScript(command);
-      if (result == "EMAIL_SENT")
+      if (result == "SUCCESS")
       {
         PrintErrorsORSucess("Email sent successfully.\n", SuccessMessagesColorCode);
         PrintColoredText("Press any key to continue...", PressKeyColorCode);
