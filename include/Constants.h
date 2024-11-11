@@ -2,6 +2,7 @@
 #define CONSTANTS_H
 
 #include <string>
+using namespace std;
 
 // <===================== 🎨 COLOR CODES FOR DIFFERENT STATEMENTS 🌈 =====================>
 const int SuccessMessagesColorCode = 10;
@@ -13,6 +14,6 @@ const int DefaultColorCode = 9;
 const int HighlightColorCode = 5;
 
 // <===================== 🚧 Keeping everything Centered from just one place 😎 =====================>
-const std::string Spaces_to_be_Centered = "\t\t\t\t\t\t\t\t\t\t";
+const string Spaces_to_be_Centered = "\t\t\t\t\t\t\t\t\t\t";
 
 #endif // CONSTANTS_H

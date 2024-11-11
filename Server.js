@@ -629,8 +629,8 @@ async function sendOTPEmail(email, otp, reason) {
                   <tr style="height: 0;">
                     <td>
                       <img
-                        alt=""
-                        src="https://cdn3.vectorstock.com/i/1000x1000/22/52/uat-letter-logo-design-on-white-background-vector-44742252.jpg"
+                        alt="AUT Bank Logo"
+                        src="https://raw.githubusercontent.com/ahad324/BankManagementSystemCpp/main/Logo.jpeg"
                         height="30px"
                       />
                     </td>
@@ -880,8 +880,8 @@ async function sendEmail(email, message) {
                   <tr style="height: 0;">
                     <td>
                       <img
-                        alt=""
-                        src="https://cdn3.vectorstock.com/i/1000x1000/22/52/uat-letter-logo-design-on-white-background-vector-44742252.jpg"
+                        alt="AUT Bank Logo"
+                        src="https://raw.githubusercontent.com/ahad324/BankManagementSystemCpp/main/Logo.jpeg"
                         height="30px"
                       />
                     </td>

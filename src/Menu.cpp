@@ -34,14 +34,8 @@ void start()
     PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
 
     cout << "\n";
-    string options[] = {"Login",
-                        "Forgot Password",
-                        "Create Account",
-                        "Admin Login",
-                        "About Us",
-                        "Exit"};
-    int size = sizeof(options) / sizeof(options[0]);
-    for (int i = 0; i < size; i++)
+    vector<string> options = {"Login", "Forgot Password", "Create Account", "Admin Login", "About Us", "Exit"};
+    for (size_t i = 0; i < options.size(); i++)
     {
       ShowMenuOptions(i + 1, options[i]);
     }
@@ -71,9 +65,9 @@ void start()
       return;
     default:
       PrintErrorsORSucess("Invalid choice. Please try again.\n", ErrorMessagesColorCode);
-      cin.clear();                                         // Clear the error flag
-      cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore the invalid input
-      _getch();                                            // Wait for user input
+      cin.clear();
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      _getch();
       break;
     }
   }

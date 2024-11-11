@@ -4,6 +4,8 @@
 #include "../include/Menu.h"
 #include <iostream>
 #include <limits>
+#include <string>
+#include <unordered_map>
 
 using namespace std;
 
@@ -30,39 +32,39 @@ void installDependency(const string &installCommand, const string &name)
 }
 bool checkAndInstallDependencies()
 {
-  bool npmInstalled = checkDependency("npm -v > nul 2>&1", "npm");
-  bool nodeInstalled = checkDependency("node -v > nul 2>&1", "Node.js");
-  bool appwriteInstalled = checkDependency("npm list appwrite > nul 2>&1", "Appwrite");
-  bool argon2Installed = checkDependency("npm list argon2 > nul 2>&1", "Argon2");
-  bool nodemailerInstalled = checkDependency("npm list nodemailer > nul 2>&1", "Nodemailer");
+  unordered_map<string, bool> dependencies = {
+      {"npm", checkDependency("npm -v > nul 2>&1", "npm")},
+      {"Node.js", checkDependency("node -v > nul 2>&1", "Node.js")},
+      {"Appwrite", checkDependency("npm list appwrite > nul 2>&1", "Appwrite")},
+      {"Argon2", checkDependency("npm list argon2 > nul 2>&1", "Argon2")},
+      {"Nodemailer", checkDependency("npm list nodemailer > nul 2>&1", "Nodemailer")}};
 
-  if (!nodeInstalled && !npmInstalled)
+  if (!dependencies["Node.js"] && !dependencies["npm"])
   {
     PrintErrorsORSucess("Node.js or npm is required to run this program. Please download and install Node.js from https://nodejs.org/en/.", ErrorMessagesColorCode);
     cout << "Press Enter to exit...";
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.get();
     return false;
   }
 
-  if (!appwriteInstalled || !argon2Installed)
+  if (!dependencies["Appwrite"] || !dependencies["Argon2"])
   {
     char choice;
-
     InputTaking("Some packages are missing. Would you like to install them? (y/n)");
     cin >> choice;
 
     if (choice == 'y' || choice == 'Y')
     {
-      if (!appwriteInstalled)
+      if (!dependencies["Appwrite"])
       {
         installDependency("npm install -g appwrite", "Appwrite");
       }
-      if (!argon2Installed)
+      if (!dependencies["Argon2"])
       {
         installDependency("npm install argon2", "Argon2");
       }
-      if (!nodemailerInstalled)
+      if (!dependencies["Nodemailer"])
       {
         installDependency("npm install nodemailer", "Nodemailer");
       }
@@ -70,15 +72,15 @@ bool checkAndInstallDependencies()
     }
     else
     {
-      if (!appwriteInstalled)
+      if (!dependencies["Appwrite"])
       {
         PrintColoredText("Appwrite is required to run this program. Exiting...", ErrorMessagesColorCode);
       }
-      if (!argon2Installed)
+      if (!dependencies["Argon2"])
       {
         PrintColoredText("Argon2 is required to run this program. Exiting...", ErrorMessagesColorCode);
       }
-      if (!nodemailerInstalled)
+      if (!dependencies["Nodemailer"])
       {
         PrintColoredText("Nodemailer is required to run this program. Exiting...", ErrorMessagesColorCode);
       }
