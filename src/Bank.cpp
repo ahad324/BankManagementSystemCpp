@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <regex>
 #include <iomanip>
+#include <stdexcept>
 #include "../include/Bank.h"
 #include "../include/Account.h"
 #include "../include/ConsoleUtils.h"
@@ -30,7 +31,7 @@ Bank::~Bank()
     delete pair.second;
   }
 }
-// <===================== ✨🔃 Data Retrieving from backend to the vectors 🔃🌟 =====================>
+// <===================== ✨🔃 Data Retrieving from backend 🔃🌟 =====================>
 void Bank::LoadAllAccountsFromBackend()
 {
   accounts.clear();
@@ -43,13 +44,6 @@ void Bank::loadAccountsFromBackend()
   string command = "FetchAccounts"; // Command to fetch all user details
   string result = FetchAllLargeDataFromJavaScript(command);
 
-  if (result.empty())
-  {
-    PrintErrorsORSucess("Failed to Connect to Database. Make sure you have a strong internet connection.Please try again.", ErrorMessagesColorCode);
-    PrintColoredText("Press any key to exit...", PressKeyColorCode);
-    _getch(); // Wait for user input
-    exit(0);  // Exit the program
-  }
   // Split the result string into lines
   stringstream ss(result);
   string line;
@@ -172,6 +166,7 @@ Account *Bank::authenticateUser(string cnic, string password)
   // If not in cache, call JavaScript function
   string command = "UserLogin " + cnic + " " + password;
   string result = callJavaScript(command);
+
   if (result == "SUCCESS")
   {
     userCache[cnic] = password; // Cache the user's password
@@ -466,22 +461,20 @@ double Bank::getValidatedAmount()
   {
     InputTaking("Enter amount");
     cin >> input;
-    if (isNumeric(input))
+
+    stringstream ss(input);
+    ss >> amount;
+    if (ss.fail() || !ss.eof())
     {
-      stringstream ss(input);
-      ss >> amount;
-      if (amount > 0)
-      {
-        break;
-      }
-      else
-      {
-        PrintErrorsORSucess("Amount should be positive.\n", ErrorMessagesColorCode);
-      }
+      PrintErrorsORSucess("Invalid amount. Please enter a numeric value.\n", ErrorMessagesColorCode);
+    }
+    else if (amount <= 0)
+    {
+      PrintErrorsORSucess("Amount should be positive.\n", ErrorMessagesColorCode);
     }
     else
     {
-      PrintErrorsORSucess("Invalid amount. Please enter a numeric value.\n", ErrorMessagesColorCode);
+      break; // Valid input
     }
   }
   return amount;

@@ -1,2 +1,5 @@
-node_modules
+node_modules/*
 output.txt
+server.exe
+AUTBank.exe
+Main.exe

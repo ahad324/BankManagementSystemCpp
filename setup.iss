@@ -12,10 +12,7 @@ AppPublisher=AbdulAhad
 
 [Files]
 Source: "Main.exe"; DestDir: "{app}"
-Source: "Server.js"; DestDir: "{app}"
-Source: "package.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".env"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Policy\*"; DestDir: "{app}\Policy";
+Source: "server.exe"; DestDir: "{app}"
 
 [Icons]
 Name: "{group}\AUTBank"; Filename: "{app}\Main.exe"; IconFilename: "{app}\Main.exe"
@@ -25,5 +22,4 @@ Name: "{commondesktop}\AUTBank"; Filename: "{app}\Main.exe"; Tasks: desktopicon;
 Name: desktopicon; Description: "Create a desktop icon"
 
 [Run]
-Filename: "{app}/Policy/PolicyChanger.exe"; Description: "Policy Checker"; Flags: nowait postinstall skipifsilent runhidden
 Filename: "{app}\Main.exe"; Description: "Launch AUTBank"; Flags: nowait postinstall skipifsilent

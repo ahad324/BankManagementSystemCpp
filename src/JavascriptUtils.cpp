@@ -6,7 +6,7 @@ using namespace std;
 // <===================== 🌐 FUNCTIONS FOR FETCHING DATA FROM BACKEND 📡 =====================>
 string callJavaScript(const string &command)
 {
-  string cmd = "node Server.js " + command + " > output.txt";
+  string cmd = "server.exe " + command + " > output.txt";
   system(cmd.c_str());
 
   ifstream file("output.txt");
@@ -20,7 +20,7 @@ string callJavaScript(const string &command)
 }
 string FetchAllLargeDataFromJavaScript(const string &command)
 {
-  string cmd = "node Server.js " + command + " > output.txt";
+  string cmd = "server.exe " + command + " > output.txt";
   system(cmd.c_str());
 
   ifstream file("output.txt");

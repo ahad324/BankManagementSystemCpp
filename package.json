@@ -1,9 +1,22 @@
 {
-  "type": "module",
+  "name": "server",
+  "version": "1.0.0",
+  "main": "Server.js",
+  "bin": "./Server.js",
+  "files": [
+    "Server.js"
+  ],
   "dependencies": {
     "appwrite": "^15.0.0",
     "argon2": "^0.40.3",
-    "dotenv": "^16.4.5",
     "nodemailer": "^6.9.14"
+  },
+  "pkg": {
+    "assets": [
+      "Server.js"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ]
   }
 }

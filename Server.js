@@ -1,3 +1,4 @@
+process.removeAllListeners('warning'); // Suppress all warnings
 /**
  * Bank Management System
  * ----------------------
@@ -11,27 +12,26 @@
  */
 
 // Importing necessary modules from Appwrite SDK
-import { Client, Databases, ID, Query } from "appwrite";
-import argon2 from 'argon2';
-import dotenv from 'dotenv';
-import nodemailer from 'nodemailer';
+const { Client, Databases, ID, Query } = require("appwrite");
+const argon2 = require("argon2");
+const nodemailer = require("nodemailer");
 
-dotenv.config();
-
-// Constants for project and collection IDs
-
-// Constants for project and collection IDs
-const PROJECT_ID = process.env.PROJECT_ID;
-const DATABASE_ID = process.env.DATABASE_ID;
-const COLLECTION_ID_USERS = process.env.COLLECTION_ID_USERS;
-const COLLECTION_ID_TRANSACTIONS = process.env.COLLECTION_ID_TRANSACTIONS;
-const COLLECTION_ID_PENDING_ACCOUNTS = process.env.COLLECTION_ID_PENDING_ACCOUNTS;
-const COLLECTION_ID_ADMIN = process.env.COLLECTION_ID_ADMIN;
+// All Configs Keys
+const config = {
+  PROJECT_ID: "674c43ae00145d935579",
+  DATABASE_ID: "674c4494001d200ea966",
+  COLLECTION_ID_USERS: "674c44b80009591a6769",
+  COLLECTION_ID_PENDING_ACCOUNTS: "674c4819002cdd664013",
+  COLLECTION_ID_TRANSACTIONS: "674c4956002350911179",
+  COLLECTION_ID_ADMIN: "674c4ae4002be0c8fa56",
+  GMAIL_USER: "autfinance.bank@gmail.com",
+  GMAIL_PASS: "vwim wcwf chif odta"
+};
 
 // Initialize Appwrite client and databases
 const client = new Client()
   .setEndpoint("https://cloud.appwrite.io/v1")
-  .setProject(PROJECT_ID);
+  .setProject(config.PROJECT_ID);
 const databases = new Databases(client);
 
 // Extract command line arguments
@@ -57,8 +57,8 @@ if (command === "FetchAccounts") {
 async function FetchAccounts() {
   try {
     let response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_ID_USERS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_USERS,
       []
     );
     for (let i = 0; i < response.total; i++) {
@@ -80,8 +80,8 @@ async function FetchAccounts() {
 async function FetchPendingAccounts() {
   try {
     let response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_ID_PENDING_ACCOUNTS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_PENDING_ACCOUNTS,
       []
     );
     for (let i = 0; i < response.total; i++) {
@@ -120,8 +120,8 @@ if (command === "MoveToAccounts") {
 async function MoveToAccounts(cnic) {
   try {
     let response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_ID_PENDING_ACCOUNTS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_PENDING_ACCOUNTS,
       [Query.equal("CNIC", cnic)]
     );
 
@@ -137,12 +137,12 @@ async function MoveToAccounts(cnic) {
     };
     // Create a new user
     const promise = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTION_ID_USERS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_USERS,
       ID.unique(),
       payload
     );
-    DeleteAccount(cnic, COLLECTION_ID_PENDING_ACCOUNTS);
+    DeleteAccount(cnic, config.COLLECTION_ID_PENDING_ACCOUNTS);
     console.log("SUCCESS");
   } catch (error) {
     console.error("Error:", error);
@@ -172,8 +172,8 @@ async function AdminLogin(username, password) {
   try {
 
     let response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_ID_ADMIN,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_ADMIN,
       []
     );
     if (response.documents[0].username === username) {
@@ -183,10 +183,9 @@ async function AdminLogin(username, password) {
       }
     }
   } catch (error) {
-    console.log("Error Occurred");
+    console.log("Error Occurred", error);
   }
 };
-
 /*<=============================================================================================================>*/
 
 /*<=============================================================================================================>
@@ -229,8 +228,8 @@ async function Register(username, pass, email, accType, cnic, key) {
     };
     // Create a new user
     const promise = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTION_ID_PENDING_ACCOUNTS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_PENDING_ACCOUNTS,
       ID.unique(),
       payload
     );
@@ -254,8 +253,8 @@ if (command === "UserLogin") {
 async function UserLogin(cnic, password) {
   try {
     let response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_ID_USERS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_USERS,
       [Query.equal("CNIC", cnic)]
     );
     if (response.documents[0].CNIC === cnic) {
@@ -267,7 +266,7 @@ async function UserLogin(cnic, password) {
       }
     }
   } catch (error) {
-    console.log("Error Occurred");
+    console.log("Error Occurred", error);
   }
 }
 /*<=============================================================================================================>*/
@@ -292,15 +291,15 @@ if (command === "BalanceUpdate") {
  */
 async function UpdateUserBalance(cnic, newBalance) {
   let response = await databases.listDocuments(
-    DATABASE_ID,
-    COLLECTION_ID_USERS,
+    config.DATABASE_ID,
+    config.COLLECTION_ID_USERS,
     [Query.equal("CNIC", cnic)]
   );
   let documentID = response.documents[0].$id;
 
   let promise = await databases.updateDocument(
-    DATABASE_ID,
-    COLLECTION_ID_USERS,
+    config.DATABASE_ID,
+    config.COLLECTION_ID_USERS,
     documentID,
     { balance: parseFloat(newBalance) }
   );
@@ -329,15 +328,15 @@ if (command === "ChangeUserPassword") {
 async function ChangeUserPassword(cnic, newPasword) {
   const hashedPassword = await argon2.hash(newPasword);
   let response = await databases.listDocuments(
-    DATABASE_ID,
-    COLLECTION_ID_USERS,
+    config.DATABASE_ID,
+    config.COLLECTION_ID_USERS,
     [Query.equal("CNIC", cnic)]
   );
   let documentID = response.documents[0].$id;
 
   let promise = await databases.updateDocument(
-    DATABASE_ID,
-    COLLECTION_ID_USERS,
+    config.DATABASE_ID,
+    config.COLLECTION_ID_USERS,
     documentID,
     { password: hashedPassword }
   );
@@ -358,15 +357,15 @@ if (command === "ChangeUserUsername") {
  */
 async function ChangeUserUsername(cnic, newUsername) {
   let response = await databases.listDocuments(
-    DATABASE_ID,
-    COLLECTION_ID_USERS,
+    config.DATABASE_ID,
+    config.COLLECTION_ID_USERS,
     [Query.equal("CNIC", cnic)]
   );
   let documentID = response.documents[0].$id;
 
   let promise = await databases.updateDocument(
-    DATABASE_ID,
-    COLLECTION_ID_USERS,
+    config.DATABASE_ID,
+    config.COLLECTION_ID_USERS,
     documentID,
     { username: newUsername }
   );
@@ -413,8 +412,8 @@ async function logTransaction(cnic, timestamp, type, amount, ToORFromCNIC) {
       ToORFromCNIC: ToORFromCNIC,
     };
     await databases.createDocument(
-      DATABASE_ID,
-      COLLECTION_ID_TRANSACTIONS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_TRANSACTIONS,
       ID.unique(),
       payload
     );
@@ -438,8 +437,8 @@ if (command === "FetchTransactions") {
 async function fetchTransactions(cnic) {
   try {
     const response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_ID_TRANSACTIONS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_TRANSACTIONS,
       [Query.equal("cnic", cnic)]
     );
     let transactions = response.documents.map((doc) => ({
@@ -494,7 +493,7 @@ async function fetchTransactions(cnic) {
 // Delete user account from the database
 if (command === "DeleteAccount") {
   const cnic = args[1];
-  DeleteAccount(cnic, COLLECTION_ID_USERS);
+  DeleteAccount(cnic, config.COLLECTION_ID_USERS);
 }
 
 /**
@@ -505,30 +504,25 @@ if (command === "DeleteAccount") {
  */
 async function DeleteAccount(cnic, CollectionID) {
   try {
-    let response = await databases.listDocuments(DATABASE_ID, CollectionID, [
+    let response = await databases.listDocuments(config.DATABASE_ID, CollectionID, [
       Query.equal("CNIC", cnic),
     ]);
     let documentID = response.documents[0].$id;
 
     let promise = await databases.deleteDocument(
-      DATABASE_ID,
+      config.DATABASE_ID,
       CollectionID,
       documentID
     );
 
-    /* The below code is using JavaScript to list documents from a database collection based on a
-    specific query (in this case, querying for documents where the "cnic" field is equal to a
-    certain value). It then iterates over the resulting documents and deletes each document from the
-    database collection one by one. The code uses asynchronous functions and awaits the completion
-    of each operation before moving on to the next one. */
-    let res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID_TRANSACTIONS, [
+    let res = await databases.listDocuments(config.DATABASE_ID, config.COLLECTION_ID_TRANSACTIONS, [
       Query.equal("cnic", cnic),
     ]);
 
     res.documents.forEach(async (doc) => {
       let promise = await databases.deleteDocument(
-        DATABASE_ID,
-        COLLECTION_ID_TRANSACTIONS,
+        config.DATABASE_ID,
+        config.COLLECTION_ID_TRANSACTIONS,
         doc.$id
       );
     })
@@ -547,8 +541,8 @@ if (command === "forgot_password") {
 async function forgot_password(cnic, key) {
   try {
     let response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_ID_USERS,
+      config.DATABASE_ID,
+      config.COLLECTION_ID_USERS,
       [Query.equal("CNIC", cnic), Query.equal("Key", key)]
     );
     if (response.total > 0) {
@@ -574,18 +568,18 @@ async function sendOTPEmail(email, otp, reason) {
     let formattedDate = date.toLocaleDateString('en-GB', options);
     // Split the formatted date to insert a comma
     let [day, month, year] = formattedDate.split(' ');
-    formattedDate = `${day} ${month}, ${year}`;
+    formattedDate = `${day} ${month} ${year}`;
 
     let transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS
+        user: config.GMAIL_USER,
+        pass: config.GMAIL_PASS
       }
     });
 
     let mailOptions = {
-      from: process.env.GMAIL_USER,
+      from: config.GMAIL_USER,
       to: email,
       subject: 'Your OTP Code',
       html: `<!DOCTYPE html>
@@ -826,18 +820,18 @@ async function sendEmail(email, message) {
     let formattedDate = date.toLocaleDateString('en-GB', options);
     // Split the formatted date to insert a comma
     let [day, month, year] = formattedDate.split(' ');
-    formattedDate = `${day} ${month}, ${year}`;
+    formattedDate = `${day} ${month} ${year}`;
 
     let transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS
+        user: config.GMAIL_USER,
+        pass: config.GMAIL_PASS
       }
     });
 
     let mailOptions = {
-      from: process.env.GMAIL_USER,
+      from: config.GMAIL_USER,
       to: email,
       subject: 'Message from AUT Finance Bank',
       html: `<!DOCTYPE html>
