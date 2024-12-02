@@ -44,6 +44,7 @@ public:
   void viewTransactionHistory(string cnic) const;
   virtual string getAccountType() const = 0;
   string getCurrentTimestamp();
+  bool isBalanceValid(double testBalance);
 };
 
 class SavingsAccount : public Account

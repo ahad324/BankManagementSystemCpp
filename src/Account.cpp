@@ -61,45 +61,64 @@ void Account::UpdateBalanceInBackend()
   string result = callJavaScript(command);
 }
 
+bool Account::isBalanceValid(double testBalance)
+{
+  const int MaxAmount = 100000;
+  if (testBalance > MaxAmount)
+  {
+    PrintErrorsORSucess("Deposit failed: Balance cannot exceed $100,000.", ErrorMessagesColorCode);
+    return false;
+  }
+  if (testBalance < 0)
+  {
+    PrintErrorsORSucess("Deposit failed: Balance cannot be negative.", ErrorMessagesColorCode);
+    return false;
+  }
+  return true;
+}
+
 // Deposit money into account
 void Account::deposit(double amount, string type, string acctype)
 {
-  if (balance + amount > 1000000)
-  {
-    PrintErrorsORSucess("Deposit failed: Balance cannot exceed $1,000,000.", ErrorMessagesColorCode);
-    return;
-  }
-  else if (balance + amount < 0)
-  {
-    PrintErrorsORSucess("Deposit failed: Balance cannot be negative.", ErrorMessagesColorCode);
-    return;
-  }
-  // Perform deposit
-  balance += amount;
-  string timestamp = getCurrentTimestamp();
-  transactions.push_back({timestamp, username, type, amount});
+  double newBalance = balance;
 
-  // Log transaction if not received or transfer
-  if (type != "Received" && type != "Transfer")
-  {
-    logTransaction(cnic, timestamp, type, amount); // Log transaction
-  }
-  // Update balance in backend
-  UpdateBalanceInBackend();
+  // Validate deposit
+  newBalance += amount;
+  if (!isBalanceValid(newBalance))
+    return; // Exit the function if the balance is invalid
 
-  // Calculate and apply interest for savings account
+  // If it's a savings account, calculate interest
   if (acctype == "Savings")
   {
-    double annualInterestRate = 0.01;                                    // Example: 1% per annum
-    double interest = amount * (annualInterestRate / 12);                // Monthly interest calculation
-    balance += interest;                                                 // Add interest to balance
-    transactions.push_back({timestamp, username, "Interest", interest}); // Log interest transaction
-    logTransaction(cnic, timestamp, "Interest", interest);               // Log interest in backend
-    UpdateBalanceInBackend();                                            // Update balance in backend again after adding interest
+    double annualInterestRate = 0.01;                     // Example: 1% per annum
+    double interest = amount * (annualInterestRate / 12); // Monthly interest calculation
+    newBalance += interest;
+
+    if (!isBalanceValid(newBalance))
+      return; // Exit the function if the balance is invalid after interest calculation
+
+    // Apply interest
+    transactions.push_back({getCurrentTimestamp(), username, "Interest", interest});
+    logTransaction(cnic, getCurrentTimestamp(), "Interest", interest);
     PrintErrorsORSucess("Interest earned on deposit: " + to_string(interest), SuccessMessagesColorCode);
   }
+
+  // Update the actual balance after all checks pass
+  balance = newBalance;
+
+  // Log the deposit transaction
+  string timestamp = getCurrentTimestamp();
+  transactions.push_back({timestamp, username, type, amount});
+  if (type != "Received" && type != "Transfer")
+  {
+    logTransaction(cnic, timestamp, type, amount);
+  }
+
+  // Update balance in the backend
+  UpdateBalanceInBackend();
   PrintErrorsORSucess("Deposit successful.\n", SuccessMessagesColorCode);
 }
+
 // Withdraw money from account
 bool Account::withdraw(double amount, string type)
 {

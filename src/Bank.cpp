@@ -461,20 +461,22 @@ double Bank::getValidatedAmount()
   {
     InputTaking("Enter amount");
     cin >> input;
-
-    stringstream ss(input);
-    ss >> amount;
-    if (ss.fail() || !ss.eof())
+    if (isNumeric(input))
     {
-      PrintErrorsORSucess("Invalid amount. Please enter a numeric value.\n", ErrorMessagesColorCode);
-    }
-    else if (amount <= 0)
-    {
-      PrintErrorsORSucess("Amount should be positive.\n", ErrorMessagesColorCode);
+      stringstream ss(input);
+      ss >> amount;
+      if (amount > 0)
+      {
+        break;
+      }
+      else
+      {
+        PrintErrorsORSucess("Amount should be positive.\n", ErrorMessagesColorCode);
+      }
     }
     else
     {
-      break; // Valid input
+      PrintErrorsORSucess("Invalid amount. Please enter a numeric value.\n", ErrorMessagesColorCode);
     }
   }
   return amount;
@@ -1183,36 +1185,50 @@ void Bank::About()
   PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
   cout << "\n";
 
-  PrintColoredText("Meet Our Team", TittleColorCode);
+  // Team Section
+  PrintColoredText("Who We Are", TittleColorCode);
+  cout << "\n";
+  PrintErrorsORSucess("AUT Finance Bank is a dynamic and innovative project developed to simplify financial", DefaultColorCode);
+  PrintErrorsORSucess("operations with the power of technology. Our mission is to empower users by providing", DefaultColorCode);
+  PrintErrorsORSucess("secure and seamless banking services, all while setting new benchmarks in user experience.", DefaultColorCode);
+  cout << "\n\n";
+
+  PrintColoredText("Meet the Team", TittleColorCode);
   cout << "\n";
 
   string Names[] = {
-      " [.] AbdulAhad Sadiq",
-      " [.] Taimoor Hassan",
-      " [.] Usman Ali",
+      " [1] AbdulAhad Sadiq",
+      " [2] Taimoor Hassan",
+      " [3] Usman Ali",
+      " [4] Ali Hassan",
   };
-  int size = sizeof(Names) / sizeof(Names[0]);
-  for (int i = 0; i < size; i++)
+  for (const auto &name : Names)
   {
-    PrintErrorsORSucess(Names[i], HighlightColorCode);
+    PrintErrorsORSucess(name, HighlightColorCode);
   }
-  setConsoleForegroundColor(DefaultColorCode);
-  cout << "\n\n";
-
-  PrintColoredText("Project Overview", TittleColorCode);
-  cout << "\n";
-  PrintErrorsORSucess(" Using Object-Oriented Programming (OOP) principles in C++ for the frontend", DefaultColorCode);
-  PrintErrorsORSucess(" and Node.js for the backend,", DefaultColorCode);
-  PrintErrorsORSucess(" we've crafted an application that seamlessly integrates functionality and performance.", DefaultColorCode);
   cout << "\n";
 
-  PrintErrorsORSucess(" Utilizing Appwrite, a robust Cloud-based Database,", DefaultColorCode);
-  PrintErrorsORSucess(" we ensure global connectivity and data security for all our users.", DefaultColorCode);
+  // Project Details Section
+  PrintColoredText("What Makes Us Stand Out", TittleColorCode);
+  cout << "\n";
+  PrintErrorsORSucess("Advanced Object-Oriented Programming: Utilizing C++ to create a robust and", DefaultColorCode);
+  PrintErrorsORSucess("    efficient frontend system.", DefaultColorCode);
+  PrintErrorsORSucess("Seamless Backend Integration: Powered by Node.js for real-time performance.", DefaultColorCode);
+  PrintErrorsORSucess("Secure Cloud-Based Database: With Appwrite, we ensure your data remains", DefaultColorCode);
+  PrintErrorsORSucess("    protected while offering global accessibility.", DefaultColorCode);
+  cout << "\n";
+
+  // Acknowledgment Section
+  PrintColoredText("Our Commitment", TittleColorCode);
+  cout << "\n";
+  PrintErrorsORSucess("Your trust drives us forward. At AUT Finance Bank, we strive to deliver exceptional", DefaultColorCode);
+  PrintErrorsORSucess("services, combining state-of-the-art technology with a user-first approach.", DefaultColorCode);
   cout << "\n\n";
 
-  PrintErrorsORSucess("Thank you for using our application!", SuccessMessagesColorCode);
+  PrintErrorsORSucess("Thank you for choosing AUT Finance Bank. Together, let's shape the future of banking!", SuccessMessagesColorCode);
   cout << "\n\n";
 
-  PrintErrorsORSucess("Press any key to continue...", PressKeyColorCode);
+  // Instruction to continue
+  PrintErrorsORSucess("Press any key to return to the main menu...", PressKeyColorCode);
   _getch(); // Wait for user input
 }
