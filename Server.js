@@ -59,7 +59,7 @@ async function FetchAccounts() {
     let response = await databases.listDocuments(
       config.DATABASE_ID,
       config.COLLECTION_ID_USERS,
-      []
+      [Query.orderAsc("$createdAt")]
     );
     for (let i = 0; i < response.total; i++) {
       const user = response.documents[i];
@@ -82,7 +82,7 @@ async function FetchPendingAccounts() {
     let response = await databases.listDocuments(
       config.DATABASE_ID,
       config.COLLECTION_ID_PENDING_ACCOUNTS,
-      []
+      [Query.orderAsc("$createdAt")]
     );
     for (let i = 0; i < response.total; i++) {
       const user = response.documents[i];
@@ -525,7 +525,7 @@ async function DeleteAccount(cnic, CollectionID) {
         doc.$id
       );
     })
-    console.log("ACCOUNT_DELETED");
+    console.log("SUCCESS");
   } catch (error) {
     console.error("Error:", error);
   }

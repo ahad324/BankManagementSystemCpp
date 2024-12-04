@@ -1,7 +1,7 @@
 #ifndef BANK_H
 #define BANK_H
 
-#include <unordered_map>
+#include <map>
 #include <string>
 #include "Account.h"
 
@@ -10,10 +10,10 @@ using namespace std;
 class Bank
 {
 private:
-  unordered_map<string, Account *> accounts;
-  unordered_map<string, Account *> pendingAccounts;
-  unordered_map<string, string> userCache;  // Cache for user CNICs and passwords
-  unordered_map<string, string> adminCache; // Cache for admin usernames and passwords
+  map<string, Account *> accounts;
+  map<string, Account *> pendingAccounts;
+  map<string, string> userCache;  // Cache for user CNICs and passwords
+  map<string, string> adminCache; // Cache for admin usernames and passwords
 
 public:
   Bank();
@@ -25,9 +25,15 @@ public:
   bool authenticateAdmin(string username, string password);
   Account *authenticateUser(string cnic, string password);
   void createAccount(Account *account, bool isPending = false);
-  void approvePendingAccounts();
   void changeUserPassword(string cnic, string new_password);
   void changeUserUsername(string cnic, string new_username, Account *account);
+  void displayAccountsInTable(const map<string, Account *> &accountMap);
+  void displaySortedDataInTable(const vector<pair<string, Account *>> &accountVec);
+  void sortAccounts(map<string, Account *> &accountMap, const string &sortBy);
+  void searchAccount(map<string, Account *> &accountMap, const string &searchBy, const string &value);
+  void approveSelectedAccount();
+  void removeSelectedAccount();
+  void approvePendingAccounts();
   void viewAllAccounts();
   void removeAccount();
   bool isNumeric(const string &str);

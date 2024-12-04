@@ -1,12 +1,13 @@
 #include <iostream>
 #include <sstream>
-#include <unordered_map>
+#include <map>
 #include <unordered_set>
 #include <string>
 #include <conio.h>
 #include <regex>
 #include <iomanip>
 #include <stdexcept>
+#include <algorithm>
 #include "../include/Bank.h"
 #include "../include/Account.h"
 #include "../include/ConsoleUtils.h"
@@ -71,7 +72,7 @@ void Bank::loadAccountsFromBackend()
       account = new CurrentAccount(cnic, username, "", email, balance, key);
     }
 
-    // Store account in unordered_map
+    // Store account in map
     accounts[cnic] = account;
   }
 
@@ -113,7 +114,7 @@ void Bank::loadPendingAccountsFromBackend()
       pendingaccount = new CurrentAccount(cnic, username, "", email);
     }
 
-    // Store pending account in unordered_map
+    // Store pending account in map
     pendingAccounts[cnic] = pendingaccount;
   }
 }
@@ -187,114 +188,6 @@ void Bank::createAccount(Account *account, bool isPending)
   }
 }
 
-void Bank::approvePendingAccounts()
-{
-  pendingAccounts.clear();
-  cout << "\n";
-  PrintErrorsORSucess("Fetching Users...", WaitingMessagesColorCode);
-  loadPendingAccountsFromBackend();
-  system("cls");
-
-  if (pendingAccounts.empty())
-  {
-    PrintErrorsORSucess("No pending accounts to approve.\n", ErrorMessagesColorCode);
-  }
-  else
-  {
-    cout << "\n\n";
-    PrintColoredTittle(" _____________________________________________________________________________________", TittleColorCode);
-    PrintColoredTittle("|                                                                                     |", TittleColorCode);
-    PrintColoredTittle("|                                 Pending Accounts                                    |", TittleColorCode);
-    PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
-
-    cout << "\n";
-
-    // Print table header
-    cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+\n";
-    cout << "\t| No |         CNIC          |       Username       |         Email        |    Account Type   |\n";
-    cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+\n";
-
-    // Store CNICs and Emails to detect duplicates
-    unordered_set<string> cnicSet;
-    unordered_set<string> emailSet;
-    int index = 1;
-    // Iterate over pendingAccounts and print details in table format
-    for (const auto &pair : pendingAccounts)
-    {
-      string cnic = pair.second->getCNIC();
-      string email = pair.second->getEmail();
-
-      // Check for duplicates
-      bool isDuplicate = false;
-      if (cnicSet.count(cnic) > 0 || emailSet.count(email) > 0)
-      {
-        isDuplicate = true;
-      }
-
-      // Print row in red if duplicate found
-      if (isDuplicate)
-      {
-        setConsoleForegroundColor(ErrorMessagesColorCode);
-      }
-
-      // Print account details
-      cout << "\t| " << setw(2) << index++ << " | "
-           << setw(21) << cnic << " | "
-           << setw(20) << pair.second->getUsername() << " | "
-           << setw(20) << email << " | "
-           << setw(17) << pair.second->getAccountType() << " |\n";
-
-      // Reset color if printed in red
-      if (isDuplicate)
-      {
-        setConsoleForegroundColor(DefaultColorCode);
-      }
-
-      // Add CNIC and Email to sets for future checks
-      cnicSet.insert(cnic);
-      emailSet.insert(email);
-      cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+\n";
-    }
-    cout << "\n";
-
-    // Ask Admin to approve an account
-    int choice;
-    InputTaking("Enter the number of the account to approve (0 to exit)");
-    cin >> choice;
-
-    if (choice > 0 && choice <= pendingAccounts.size())
-    {
-      auto it = pendingAccounts.begin();
-      advance(it, choice - 1);
-      string cnic = it->second->getCNIC();
-
-      string command = "MoveToAccounts " + cnic;
-      string result = callJavaScript(command);
-
-      if (result == "SUCCESS")
-      {
-        // Move the account from pendingAccounts to accounts
-        accounts[cnic] = it->second;
-        pendingAccounts.erase(it);
-        PrintErrorsORSucess("Account approved and moved to main accounts.", SuccessMessagesColorCode);
-      }
-      else
-      {
-        PrintErrorsORSucess("Failed to move user to main accounts.", ErrorMessagesColorCode);
-      }
-    }
-    else
-    {
-      cin.clear();                                         // Clear the error flag
-      cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore the invalid input
-    }
-  }
-
-  cout << "\n";
-  PrintErrorsORSucess("Press any key to continue...", PressKeyColorCode);
-  _getch(); // Wait for user input
-}
-
 void Bank::changeUserPassword(string cnic, string new_password)
 {
   PrintErrorsORSucess("Hold on changing your Password...", WaitingMessagesColorCode);
@@ -323,11 +216,250 @@ void Bank::changeUserUsername(string cnic, string new_username, Account *account
   PrintColoredText("Press any key to continue...", PressKeyColorCode);
   _getch(); // Wait for user input
 }
+// Function to display accounts in table format
+void Bank::displayAccountsInTable(const map<string, Account *> &accountMap)
+{
+  // Print table header
+  cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+-------------------+\n";
+  cout << "\t| No |         CNIC          |       Username       |         Email        |      Balance      |    Account Type   |\n";
+  cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+-------------------+\n";
 
+  int i = 1;
+  // Print account details
+  for (const auto &pair : accountMap)
+  {
+    cout << "\t| " << setw(2) << i++ << " | "
+         << setw(19) << pair.second->getCNIC() << " | "
+         << setw(20) << pair.second->getUsername() << " | "
+         << setw(25) << pair.second->getEmail() << " | "
+         << setw(10) << left << "$" + to_string(pair.second->getBalance()) << " | "
+         << setw(10) << pair.second->getAccountType() << " |\n";
+    cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+-------------------+\n";
+  }
+}
+void Bank::displaySortedDataInTable(const vector<pair<string, Account *>> &accountVec)
+{
+  // Print table header
+  cout << "\t+---------------------+----------------------+---------------------------+--------------------+----------------------+\n";
+  cout << "\t|        CNIC         |       Username       |           Email           |      Balance       |    Account Type    |\n";
+  cout << "\t+---------------------+----------------------+---------------------------+--------------------+--------------------+\n";
+
+  // Print account details
+  for (const auto &pair : accountVec)
+  {
+    cout << "\t| " << setw(19) << left << pair.second->getCNIC()
+         << " | " << setw(20) << left << pair.second->getUsername()
+         << " | " << setw(25) << left << pair.second->getEmail()
+         << " | " << setw(10) << left << "$" + to_string(pair.second->getBalance())
+         << " | " << setw(10) << left << pair.second->getAccountType()
+         << " |\n";
+    cout << "\t+---------------------+----------------------+---------------------------+--------------------+------------+\n";
+  }
+}
+
+void Bank::sortAccounts(map<string, Account *> &accountMap, const string &sortBy)
+{
+  // Create a vector of pairs to hold the sorted keys and their corresponding Account objects
+  vector<pair<string, Account *>> accountVec;
+  for (const auto &pair : accountMap)
+  {
+    accountVec.push_back(pair); // Add the CNIC (key) and the Account object to the vector
+  }
+
+  // Sort the vector based on the specified criterion
+  if (sortBy == "Balance")
+  {
+    sort(accountVec.begin(), accountVec.end(),
+         [](const pair<string, Account *> &a, const pair<string, Account *> &b)
+         {
+           return a.second->getBalance() > b.second->getBalance(); // Sort by balance
+         });
+  }
+  else if (sortBy == "CNIC")
+  {
+    sort(accountVec.begin(), accountVec.end(),
+         [](const pair<string, Account *> &a, const pair<string, Account *> &b)
+         {
+           return a.first < b.first; // Sort by CNIC
+         });
+  }
+  else if (sortBy == "Name")
+  {
+    sort(accountVec.begin(), accountVec.end(),
+         [](const pair<string, Account *> &a, const pair<string, Account *> &b)
+         {
+           return a.second->getUsername() < b.second->getUsername(); // Sort by name
+         });
+  }
+
+  // Pass the sorted vector to the display function
+  displaySortedDataInTable(accountVec);
+}
+
+// Generalized search function (works for both accounts and pending accounts)
+void Bank::searchAccount(map<string, Account *> &accountMap, const string &searchBy, const string &value)
+{
+  bool found = false;
+
+  for (const auto &pair : accountMap)
+  {
+    if ((searchBy == "CNIC" && pair.second->getCNIC() == value) ||
+        (searchBy == "Name" && pair.second->getUsername() == value))
+    {
+      found = true;
+      // Display account
+      map<string, Account *> matchingAccounts;
+      matchingAccounts[pair.first] = pair.second;
+      displayAccountsInTable(matchingAccounts);
+      break;
+    }
+  }
+
+  if (!found)
+  {
+    PrintErrorsORSucess("No account found with that " + searchBy + ".", ErrorMessagesColorCode);
+  }
+}
+
+void Bank::approveSelectedAccount()
+{
+  int choice;
+  InputTaking("Enter the number of the account to approve (0 to exit)");
+  cin >> choice;
+
+  if (choice > 0 && choice <= pendingAccounts.size())
+  {
+    auto it = pendingAccounts.begin();
+    advance(it, choice - 1); // Move iterator to the selected position
+    string cnic = it->second->getCNIC();
+
+    // Move account to the main accounts list
+    string command = "MoveToAccounts " + cnic;
+    string result = callJavaScript(command);
+
+    if (result == "SUCCESS")
+    {
+      // Add the account to the main accounts map and remove it from pending accounts
+      accounts[cnic] = it->second;
+      pendingAccounts.erase(it);
+      PrintErrorsORSucess("Account approved and moved to main accounts.", SuccessMessagesColorCode);
+    }
+    else
+    {
+      PrintErrorsORSucess("Failed to approve account.", ErrorMessagesColorCode);
+    }
+  }
+  else
+  {
+    PrintErrorsORSucess("Invalid account number. Exiting...", ErrorMessagesColorCode);
+  }
+}
+void Bank::removeSelectedAccount()
+{
+  int choice;
+  InputTaking("Enter the number of the account to approve (0 to exit)");
+  cin >> choice;
+  if (choice > 0 && choice <= accounts.size())
+  {
+    auto it = accounts.begin();
+    advance(it, choice - 1); // Move iterator to the selected position
+    string command = "DeleteAccount " + it->second->getCNIC();
+    string result = callJavaScript(command);
+
+    if (result == "SUCCESS")
+    {
+      delete it->second;  // Free memory for the account object
+      accounts.erase(it); // Remove from the map
+      PrintErrorsORSucess("Account removed.\n", SuccessMessagesColorCode);
+    }
+    else
+    {
+      PrintErrorsORSucess("Failed to delete account. Make sure you have an active internet connection.", ErrorMessagesColorCode);
+    }
+  }
+  else
+  {
+    PrintErrorsORSucess("Invalid account number. Exiting...", ErrorMessagesColorCode);
+  }
+  cout << "\n";
+  PrintColoredText("Press any key to continue...", PressKeyColorCode);
+  _getch(); // Wait for user input
+}
+
+void Bank::approvePendingAccounts()
+{
+  pendingAccounts.clear();
+  cout << "\n";
+  PrintErrorsORSucess("Fetching Accounts...", WaitingMessagesColorCode);
+  loadPendingAccountsFromBackend();
+  system("cls");
+
+  if (pendingAccounts.empty())
+  {
+    PrintErrorsORSucess("No pending accounts to approve.\n", ErrorMessagesColorCode);
+  }
+  else
+  {
+    cout << "\n\n";
+    PrintColoredTittle(" _____________________________________________________________________________________", TittleColorCode);
+    PrintColoredTittle("|                                                                                     |", TittleColorCode);
+    PrintColoredTittle("|                                 Pending Accounts                                    |", TittleColorCode);
+    PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
+
+    cout << "\n";
+
+    displayAccountsInTable(pendingAccounts);
+    cout << "\n";
+
+    // Show options after displaying pending accounts
+    vector<string> options = {"Search by CNIC", "Search by Name", "Approve Account", "Clear Screen", "Exit"};
+    int choice;
+    while (true)
+    {
+      InputTaking("Enter your choice");
+      for (auto i = 0; i < options.size(); i++)
+      {
+        ShowMenuOptions(i + 1, options[i]);
+      }
+      cin >> choice;
+      switch (choice)
+      {
+      case 1:
+      {
+        string cnic;
+        InputTaking("Enter CNIC to search for");
+        cin >> cnic;
+        searchAccount(pendingAccounts, "CNIC", cnic);
+        break;
+      }
+      break;
+      case 2:
+      {
+        string name;
+        InputTaking("Enter Name to search for");
+        cin >> name;
+        searchAccount(pendingAccounts, "Name", name);
+        break;
+      }
+      case 3:
+        approveSelectedAccount();
+        break;
+      case 4:
+        system("cls");
+        break;
+      case 5:
+        return;
+      default:
+        PrintErrorsORSucess("Invalid choice. Please try again.\n", ErrorMessagesColorCode);
+        break;
+      }
+    }
+  }
+}
 void Bank::viewAllAccounts()
 {
   accounts.clear();
-  PrintErrorsORSucess("Fetching Users...", WaitingMessagesColorCode);
+  PrintErrorsORSucess("Fetching Accounts...", WaitingMessagesColorCode);
   loadAccountsFromBackend();
   system("cls");
 
@@ -345,35 +477,66 @@ void Bank::viewAllAccounts()
 
     cout << "\n";
 
-    // Print table header
-    cout << "\t+---------------------+----------------------+---------------------------+--------------------+------------+\n";
-    cout << "\t|        CNIC         |       Username       |           Email           |      Balance       |    Type    |\n";
-    cout << "\t+---------------------+----------------------+---------------------------+--------------------+------------+\n";
+    // Call the function to display accounts
+    displayAccountsInTable(accounts);
 
-    // Print account details
-    for (const auto &pair : accounts)
+    // Show options after displaying accounts
+    vector<string> options = {"Sort by Balance", "Sort by CNIC", "Sort by Name", "Search by CNIC", "Search by Name", "Clear Screen", "Exit"};
+    int choice;
+    while (true)
     {
-      cout << "\t| " << setw(19) << left << pair.second->getCNIC()
-           << " | " << setw(20) << left << pair.second->getUsername()
-           << " | " << setw(25) << left << pair.second->getEmail()
-           << " | " << setw(18) << left << "$" + to_string(pair.second->getBalance())
-           << " | " << setw(10) << left << pair.second->getAccountType()
-           << " |\n";
+      for (auto i = 0; i < options.size(); i++)
+      {
+        ShowMenuOptions(i + 1, options[i]);
+      }
+      InputTaking("Enter your choice");
+      cin >> choice;
+
+      switch (choice)
+      {
+      case 1:
+        sortAccounts(accounts, "Balance");
+        break;
+      case 2:
+        sortAccounts(accounts, "CNIC");
+        break;
+      case 3:
+        sortAccounts(accounts, "Name");
+        break;
+      case 4:
+      {
+        string cnic;
+        InputTaking("Enter CNIC to search for");
+        cin >> cnic;
+        searchAccount(accounts, "CNIC", cnic);
+      }
+      break;
+      case 5:
+      {
+        string name;
+        InputTaking("Enter Name to search for");
+        cin >> name;
+        searchAccount(accounts, "Name", name);
+      }
+      break;
+      case 6:
+        system("cls");
+        break;
+      case 7:
+        return;
+      default:
+        PrintErrorsORSucess("Invalid choice. Please try again.\n", ErrorMessagesColorCode);
+        break;
+      }
     }
-
-    // Print table footer
-    cout << "\t+---------------------+----------------------+---------------------------+--------------------+------------+\n";
   }
-
-  cout << "\n";
-  PrintColoredText("Press any key to continue...", PressKeyColorCode);
-  _getch(); // Wait for user input
 }
+
 void Bank::removeAccount()
 {
   accounts.clear();
   cout << "\n";
-  PrintErrorsORSucess("Fetching Users...", WaitingMessagesColorCode);
+  PrintErrorsORSucess("Fetching Accounts...", WaitingMessagesColorCode);
   loadAccountsFromBackend();
   system("cls");
 
@@ -391,56 +554,60 @@ void Bank::removeAccount()
 
     cout << "\n";
 
-    // Print table header
-    cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+-------------------+\n";
-    cout << "\t| No |         CNIC          |       Username       |         Email        |      Balance      |    Account Type   |\n";
-    cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+-------------------+\n";
+    displayAccountsInTable(accounts);
 
-    int index = 1;
-    // Iterate over accounts and print details in table format
-    for (const auto &pair : accounts)
-    {
-      cout << "\t| " << setw(2) << index++ << " | "
-           << setw(21) << pair.second->getCNIC() << " | "
-           << setw(20) << pair.second->getUsername() << " | "
-           << setw(20) << pair.second->getEmail() << " | "
-           << setw(17) << fixed << setprecision(2) << pair.second->getBalance() << " | "
-           << setw(17) << pair.second->getAccountType() << " |\n";
-      cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+-------------------+\n";
-    }
-
-    cout << "\n";
+    // Show options after displaying accounts
+    vector<string> options = {"Sort by Balance", "Sort by CNIC", "Sort by Name", "Search by CNIC", "Search by Name", "Remove Account", "Clear Screen", "Exit"};
     int choice;
-    InputTaking("Enter the number of the account to remove (0 to exit)");
-    cin >> choice;
-
-    if (choice > 0 && choice <= accounts.size())
+    while (true)
     {
-      auto it = accounts.begin();
-      advance(it, choice - 1);
-      string command = "DeleteAccount " + it->second->getCNIC();
-      string result = callJavaScript(command);
-      if (result == "ACCOUNT_DELETED")
+      InputTaking("Enter your choice");
+      for (auto i = 0; i < options.size(); i++)
       {
-        delete it->second;
-        accounts.erase(it);
-        PrintErrorsORSucess("Account removed.\n", SuccessMessagesColorCode);
+        ShowMenuOptions(i + 1, options[i]);
       }
-      else
+      cin >> choice;
+      switch (choice)
       {
-        PrintErrorsORSucess("Failed to delete account. Make sure you have an active internet connection.", ErrorMessagesColorCode);
+      case 1:
+        sortAccounts(accounts, "Balance");
+        break;
+      case 2:
+        sortAccounts(accounts, "CNIC");
+        break;
+      case 3:
+        sortAccounts(accounts, "Name");
+        break;
+      case 4:
+      {
+        string cnic;
+        InputTaking("Enter CNIC to search for");
+        cin >> cnic;
+        searchAccount(accounts, "CNIC", cnic);
+        break;
       }
-    }
-    else
-    {
-      cin.clear();                                         // Clear the error flag
-      cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore the invalid input
+      case 5:
+      {
+        string name;
+        InputTaking("Enter Name to search for");
+        cin >> name;
+        searchAccount(accounts, "Name", name);
+        break;
+      }
+      case 6:
+        removeSelectedAccount();
+        break;
+      case 7:
+        system("cls");
+        break;
+      case 8:
+        return;
+      default:
+        PrintErrorsORSucess("Invalid choice. Please try again.\n", ErrorMessagesColorCode);
+        break;
+      }
     }
   }
-
-  cout << "\n";
-  PrintColoredText("Press any key to continue...", PressKeyColorCode);
-  _getch(); // Wait for user input
 }
 
 bool Bank::isNumeric(const string &str)
