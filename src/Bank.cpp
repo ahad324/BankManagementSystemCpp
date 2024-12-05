@@ -1378,7 +1378,7 @@ void Bank::About()
   // Project Details Section
   PrintColoredText("What Makes Us Stand Out", TittleColorCode);
   cout << "\n";
-  PrintErrorsORSucess("Advanced Object-Oriented Programming: Utilizing C++ to create a robust and", DefaultColorCode);
+  PrintErrorsORSucess("Advanced OOP & DSA: Utilizing C++ to create a robust and", DefaultColorCode);
   PrintErrorsORSucess("    efficient frontend system.", DefaultColorCode);
   PrintErrorsORSucess("Seamless Backend Integration: Powered by Node.js for real-time performance.", DefaultColorCode);
   PrintErrorsORSucess("Secure Cloud-Based Database: With Appwrite, we ensure your data remains", DefaultColorCode);
@@ -1395,7 +1395,6 @@ void Bank::About()
   PrintErrorsORSucess("Thank you for choosing AUT Finance Bank. Together, let's shape the future of banking!", SuccessMessagesColorCode);
   cout << "\n\n";
 
-  // Instruction to continue
   PrintErrorsORSucess("Press any key to return to the main menu...", PressKeyColorCode);
   _getch(); // Wait for user input
 }
