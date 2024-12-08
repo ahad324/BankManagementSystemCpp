@@ -2,11 +2,12 @@
 #define MENU_H
 
 #include <string>
+#include <vector>
 #include <iostream>
 
 using namespace std;
 
-void ShowMenuOptions(int num, string &option);
+void ShowMenuOptions(const vector<string> &options);
 void InputTaking(const string &prompt);
 void start();
 

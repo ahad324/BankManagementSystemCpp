@@ -1,8 +1,9 @@
 #ifndef BANK_H
 #define BANK_H
 
-#include <map>
+#include <unordered_map>
 #include <string>
+#include <vector>
 #include "Account.h"
 
 using namespace std;
@@ -10,10 +11,10 @@ using namespace std;
 class Bank
 {
 private:
-  map<string, Account *> accounts;
-  map<string, Account *> pendingAccounts;
-  map<string, string> userCache;  // Cache for user CNICs and passwords
-  map<string, string> adminCache; // Cache for admin usernames and passwords
+  unordered_map<string, Account *> accounts;
+  unordered_map<string, Account *> pendingAccounts;
+  unordered_map<string, string> userCache;  // Cache for user CNICs and passwords
+  unordered_map<string, string> adminCache; // Cache for admin usernames and passwords
 
 public:
   Bank();
@@ -27,10 +28,10 @@ public:
   void createAccount(Account *account, bool isPending = false);
   void changeUserPassword(string cnic, string new_password);
   void changeUserUsername(string cnic, string new_username, Account *account);
-  void displayAccountsInTable(const map<string, Account *> &accountMap);
+  void displayAccountsInTable(const unordered_map<string, Account *> &accountMap);
   void displaySortedDataInTable(const vector<pair<string, Account *>> &accountVec);
-  void sortAccounts(map<string, Account *> &accountMap, const string &sortBy);
-  void searchAccount(map<string, Account *> &accountMap, const string &searchBy, const string &value);
+  void sortAccounts(unordered_map<string, Account *> &accountMap, const string &sortBy);
+  void searchAccount(unordered_map<string, Account *> &accountMap, const string &searchBy, const string &value);
   void approveSelectedAccount();
   void removeSelectedAccount();
   void approvePendingAccounts();

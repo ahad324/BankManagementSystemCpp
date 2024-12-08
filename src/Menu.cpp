@@ -1,5 +1,6 @@
 #include <limits>
 #include <conio.h>
+#include <vector>
 #include <iostream>
 #include "Constants.h"
 #include "../include/Menu.h"
@@ -8,13 +9,17 @@
 
 using namespace std;
 
-void ShowMenuOptions(int num, string &option)
+void ShowMenuOptions(const vector<string> &options)
 {
-  setConsoleForegroundColor(TittleColorCode);
-  cout << Spaces_to_be_Centered << "[" << num << "]" << "- ";
-  setConsoleForegroundColor(DefaultColorCode);
-  cout << option << endl;
+  for (size_t i = 0; i < options.size(); i++)
+  {
+    setConsoleForegroundColor(TittleColorCode);
+    cout << Spaces_to_be_Centered << "[" << i + 1 << "]" << "- ";
+    setConsoleForegroundColor(DefaultColorCode);
+    cout << options[i] << endl;
+  }
 }
+
 void InputTaking(const string &text)
 {
   setConsoleForegroundColor(TittleColorCode);
@@ -35,10 +40,8 @@ void start()
 
     cout << "\n";
     vector<string> options = {"Login", "Forgot Password", "Create Account", "Admin Login", "About Us", "Exit"};
-    for (size_t i = 0; i < options.size(); i++)
-    {
-      ShowMenuOptions(i + 1, options[i]);
-    }
+    ShowMenuOptions(options);
+
     cout << "\n";
     int choice;
     InputTaking("Enter your choice");

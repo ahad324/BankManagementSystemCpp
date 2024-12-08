@@ -1,8 +1,9 @@
 #include <iostream>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 #include <unordered_set>
 #include <string>
+#include <vector>
 #include <conio.h>
 #include <regex>
 #include <iomanip>
@@ -72,7 +73,7 @@ void Bank::loadAccountsFromBackend()
       account = new CurrentAccount(cnic, username, "", email, balance, key);
     }
 
-    // Store account in map
+    // Store account
     accounts[cnic] = account;
   }
 
@@ -114,7 +115,7 @@ void Bank::loadPendingAccountsFromBackend()
       pendingaccount = new CurrentAccount(cnic, username, "", email);
     }
 
-    // Store pending account in map
+    // Store pending account
     pendingAccounts[cnic] = pendingaccount;
   }
 }
@@ -217,7 +218,7 @@ void Bank::changeUserUsername(string cnic, string new_username, Account *account
   _getch(); // Wait for user input
 }
 // Function to display accounts in table format
-void Bank::displayAccountsInTable(const map<string, Account *> &accountMap)
+void Bank::displayAccountsInTable(const unordered_map<string, Account *> &accountMap)
 {
   // Print table header
   cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+-------------------+\n";
@@ -236,6 +237,7 @@ void Bank::displayAccountsInTable(const map<string, Account *> &accountMap)
          << setw(10) << pair.second->getAccountType() << " |\n";
     cout << "\t+----+-----------------------+----------------------+----------------------+-------------------+-------------------+\n";
   }
+  cout << "\n\n";
 }
 void Bank::displaySortedDataInTable(const vector<pair<string, Account *>> &accountVec)
 {
@@ -255,9 +257,10 @@ void Bank::displaySortedDataInTable(const vector<pair<string, Account *>> &accou
          << " |\n";
     cout << "\t+---------------------+----------------------+---------------------------+--------------------+------------+\n";
   }
+  cout << "\n\n";
 }
 
-void Bank::sortAccounts(map<string, Account *> &accountMap, const string &sortBy)
+void Bank::sortAccounts(unordered_map<string, Account *> &accountMap, const string &sortBy)
 {
   // Create a vector of pairs to hold the sorted keys and their corresponding Account objects
   vector<pair<string, Account *>> accountVec;
@@ -297,7 +300,7 @@ void Bank::sortAccounts(map<string, Account *> &accountMap, const string &sortBy
 }
 
 // Generalized search function (works for both accounts and pending accounts)
-void Bank::searchAccount(map<string, Account *> &accountMap, const string &searchBy, const string &value)
+void Bank::searchAccount(unordered_map<string, Account *> &accountMap, const string &searchBy, const string &value)
 {
   bool found = false;
 
@@ -308,7 +311,7 @@ void Bank::searchAccount(map<string, Account *> &accountMap, const string &searc
     {
       found = true;
       // Display account
-      map<string, Account *> matchingAccounts;
+      unordered_map<string, Account *> matchingAccounts;
       matchingAccounts[pair.first] = pair.second;
       displayAccountsInTable(matchingAccounts);
       break;
@@ -339,7 +342,7 @@ void Bank::approveSelectedAccount()
 
     if (result == "SUCCESS")
     {
-      // Add the account to the main accounts map and remove it from pending accounts
+      // Add the account to the main accounts and remove it from pending accounts
       accounts[cnic] = it->second;
       pendingAccounts.erase(it);
       PrintErrorsORSucess("Account approved and moved to main accounts.", SuccessMessagesColorCode);
@@ -357,7 +360,7 @@ void Bank::approveSelectedAccount()
 void Bank::removeSelectedAccount()
 {
   int choice;
-  InputTaking("Enter the number of the account to approve (0 to exit)");
+  InputTaking("Enter the number of the account to remove (0 to exit)");
   cin >> choice;
   if (choice > 0 && choice <= accounts.size())
   {
@@ -369,7 +372,7 @@ void Bank::removeSelectedAccount()
     if (result == "SUCCESS")
     {
       delete it->second;  // Free memory for the account object
-      accounts.erase(it); // Remove from the map
+      accounts.erase(it); // Remove from the unordered_map
       PrintErrorsORSucess("Account removed.\n", SuccessMessagesColorCode);
     }
     else
@@ -409,18 +412,15 @@ void Bank::approvePendingAccounts()
     cout << "\n";
 
     displayAccountsInTable(pendingAccounts);
-    cout << "\n";
 
     // Show options after displaying pending accounts
-    vector<string> options = {"Search by CNIC", "Search by Name", "Approve Account", "Clear Screen", "Exit"};
+    vector<string> options = {"Search by CNIC", "Search by Name", "Approve Account", "Clear Screen", "Display all Accounts", "Exit"};
     int choice;
     while (true)
     {
       InputTaking("Enter your choice");
-      for (auto i = 0; i < options.size(); i++)
-      {
-        ShowMenuOptions(i + 1, options[i]);
-      }
+      ShowMenuOptions(options);
+
       cin >> choice;
       switch (choice)
       {
@@ -448,6 +448,9 @@ void Bank::approvePendingAccounts()
         system("cls");
         break;
       case 5:
+        displayAccountsInTable(pendingAccounts);
+        break;
+      case 6:
         return;
       default:
         PrintErrorsORSucess("Invalid choice. Please try again.\n", ErrorMessagesColorCode);
@@ -481,14 +484,12 @@ void Bank::viewAllAccounts()
     displayAccountsInTable(accounts);
 
     // Show options after displaying accounts
-    vector<string> options = {"Sort by Balance", "Sort by CNIC", "Sort by Name", "Search by CNIC", "Search by Name", "Clear Screen", "Exit"};
+    vector<string> options = {"Sort by Balance", "Sort by CNIC", "Sort by Name", "Search by CNIC", "Search by Name", "Clear Screen", "Display all Accounts", "Exit"};
     int choice;
     while (true)
     {
-      for (auto i = 0; i < options.size(); i++)
-      {
-        ShowMenuOptions(i + 1, options[i]);
-      }
+      ShowMenuOptions(options);
+
       InputTaking("Enter your choice");
       cin >> choice;
 
@@ -523,6 +524,9 @@ void Bank::viewAllAccounts()
         system("cls");
         break;
       case 7:
+        displayAccountsInTable(accounts);
+        break;
+      case 8:
         return;
       default:
         PrintErrorsORSucess("Invalid choice. Please try again.\n", ErrorMessagesColorCode);
@@ -557,15 +561,13 @@ void Bank::removeAccount()
     displayAccountsInTable(accounts);
 
     // Show options after displaying accounts
-    vector<string> options = {"Sort by Balance", "Sort by CNIC", "Sort by Name", "Search by CNIC", "Search by Name", "Remove Account", "Clear Screen", "Exit"};
+    vector<string> options = {"Sort by Balance", "Sort by CNIC", "Sort by Name", "Search by CNIC", "Search by Name", "Remove Account", "Clear Screen", "Display all Accounts", "Exit"};
     int choice;
     while (true)
     {
+      ShowMenuOptions(options);
+
       InputTaking("Enter your choice");
-      for (auto i = 0; i < options.size(); i++)
-      {
-        ShowMenuOptions(i + 1, options[i]);
-      }
       cin >> choice;
       switch (choice)
       {
@@ -601,6 +603,9 @@ void Bank::removeAccount()
         system("cls");
         break;
       case 8:
+        displayAccountsInTable(accounts);
+        break;
+      case 9:
         return;
       default:
         PrintErrorsORSucess("Invalid choice. Please try again.\n", ErrorMessagesColorCode);
@@ -783,12 +788,8 @@ void Bank::forgotPassword()
     PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
 
     cout << "\n";
-    string options[] = {"Recover password via CNIC and Key", "Recover password via Email", "Go back"};
-    int size = sizeof(options) / sizeof(options[0]);
-    for (int i = 0; i < size; i++)
-    {
-      ShowMenuOptions(i + 1, options[i]);
-    }
+    vector<string> options = {"Recover password via CNIC and Key", "Recover password via Email", "Go back"};
+    ShowMenuOptions(options);
 
     cout << "\n";
     int choice;
@@ -1182,16 +1183,14 @@ void Bank::adminMenu()
     PrintColoredTittle("|                                  Admin Dashoard                                     |", TittleColorCode);
     PrintColoredTittle("|_____________________________________________________________________________________|\n", TittleColorCode);
 
-    string options[] = {"Approve Pending Accounts",
-                        "View All Accounts",
-                        "Remove Accounts",
-                        "Write Email",
-                        "Logout"};
-    int size = sizeof(options) / sizeof(options[0]);
-    for (int i = 0; i < size; i++)
-    {
-      ShowMenuOptions(i + 1, options[i]);
-    }
+    vector<string> options = {"Approve Pending Accounts",
+                              "View All Accounts",
+                              "Remove Accounts",
+                              "Write Email",
+                              "Logout"};
+
+    ShowMenuOptions(options);
+
     cout << "\n";
     int choice;
     InputTaking("Enter your choice");

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 #include <ctime>
 #include <sstream>
 #include <conio.h>
@@ -159,7 +160,7 @@ void Account::displayMenu()
   cout << getBalance() << endl;
   setConsoleForegroundColor(DefaultColorCode);
   cout << "\n";
-  string options[] = {
+  vector<string> options = {
       "My Account",
       "Deposit",
       "Withdraw",
@@ -169,11 +170,8 @@ void Account::displayMenu()
       "Transfer Money",
       "Update Balance",
       "Logout"};
-  int size = sizeof(options) / sizeof(options[0]);
-  for (int i = 0; i < size; i++)
-  {
-    ShowMenuOptions(i + 1, options[i]);
-  }
+  ShowMenuOptions(options);
+
   cout << "\n";
 }
 // Display user details
