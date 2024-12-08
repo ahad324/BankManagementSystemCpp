@@ -302,25 +302,42 @@ void Bank::sortAccounts(unordered_map<string, Account *> &accountMap, const stri
 // Generalized search function (works for both accounts and pending accounts)
 void Bank::searchAccount(unordered_map<string, Account *> &accountMap, const string &searchBy, const string &value)
 {
-  bool found = false;
+  unordered_map<string, Account *> result; // To store matching accounts
 
-  for (const auto &pair : accountMap)
+  if (searchBy == "CNIC")
   {
-    if ((searchBy == "CNIC" && pair.second->getCNIC() == value) ||
-        (searchBy == "Name" && pair.second->getUsername() == value))
+    // Direct lookup for CNIC
+    auto it = accountMap.find(value);
+    if (it != accountMap.end())
     {
-      found = true;
-      // Display account
-      unordered_map<string, Account *> matchingAccounts;
-      matchingAccounts[pair.first] = pair.second;
-      displayAccountsInTable(matchingAccounts);
-      break;
+      result[it->first] = it->second; // Add matching account to result
     }
   }
-
-  if (!found)
+  else if (searchBy == "Name")
   {
-    PrintErrorsORSucess("No account found with that " + searchBy + ".", ErrorMessagesColorCode);
+    // Linear search for Name
+    for (const auto &pair : accountMap)
+    {
+      if (pair.second->getUsername() == value)
+      {
+        result[pair.first] = pair.second; // Add all matches to result
+      }
+    }
+  }
+  else
+  {
+    PrintErrorsORSucess("Invalid search criterion: " + searchBy, ErrorMessagesColorCode);
+    return;
+  }
+
+  // Display results
+  if (!result.empty())
+  {
+    displayAccountsInTable(result); // Show all matching accounts
+  }
+  else
+  {
+    PrintErrorsORSucess("No accounts found with " + searchBy + ": " + value, ErrorMessagesColorCode);
   }
 }
 
